@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Downloader</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body>
+    <div class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50">
+        <div class="max-w-6xl mx-auto px-4 py-16 sm:px-6 lg:px-8">
+            <!-- Hero Section -->
+            <div class="text-center mb-16">
+                <h1 class="text-4xl font-bold text-gray-900 sm:text-5xl md:text-6xl mb-8">
+                    Baixe seus vídeos em
+                    <span class="text-indigo-600">segundos</span>
+                </h1>
+                <p class="text-xl text-gray-600 max-w-2xl mx-auto">
+                    Chega de esperar! Nossa plataforma oferece downloads rápidos e seguros para seus vídeos favoritos.
+                </p>
+            </div>
+
+            <!-- Download Form -->
+            <div class="max-w-3xl mx-auto">
+                <div class="bg-white rounded-2xl shadow-xl p-8">
+                    <div class="flex flex-col md:flex-row gap-4">
+                        <input
+                            type="text"
+                            id="videoUrl"
+                            placeholder="Cole a URL do vídeo aqui"
+                            class="flex-1 px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                        >
+                        <button
+                            onclick="downloadVideo()"
+                            id="downloadButton"
+                            class="flex items-center justify-center px-6 py-3 rounded-lg text-white font-medium transition-colors bg-indigo-600 hover:bg-indigo-700"
+                        >
+                            <span id="buttonIcon" class="mr-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                            </span>
+                            Baixar
+                        </button>
+                    </div>
+
+                    <!-- Progress Bar -->
+                    <div id="progressContainer" class="mt-6 hidden">
+                        <div class="bg-gray-200 rounded-full h-2 overflow-hidden">
+                            <div id="progressBar" class="bg-indigo-600 h-full transition-all duration-500 ease-out" style="width: 0%"></div>
+                        </div>
+                        <div class="flex items-center justify-between mt-2 text-sm text-gray-600">
+                            <span id="downloadStatus">Baixando...</span>
+                            <span id="progressPercentage">0%</span>
+                        </div>
+                    </div>
+
+                    <div id="successMessage" class="mt-6 hidden flex items-center justify-center text-green-600">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                        <span>Download concluído com sucesso!</span>
+                    </div>
+                </div>
+
+                <!-- Features -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mt-16">
+                    <div class="text-center">
+                        <div class="bg-indigo-100 rounded-full p-3 w-12 h-12 flex items-center justify-center mx-auto mb-4">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-indigo-600"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                        </div>
+                        <h3 class="text-lg font-semibold text-gray-900 mb-2">Download Rápido</h3>
+                        <p class="text-gray-600">Baixe seus vídeos em alta velocidade</p>
+                    </div>
+                    <div class="text-center">
+                        <div class="bg-indigo-100 rounded-full p-3 w-12 h-12 flex items-center justify-center mx-auto mb-4">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-indigo-600"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                        </div>
+                        <h3 class="text-lg font-semibold text-gray-900 mb-2">Alta Qualidade</h3>
+                        <p class="text-gray-600">Mantenha a qualidade original dos vídeos</p>
+                    </div>
+                    <div class="text-center">
+                        <div class="bg-indigo-100 rounded-full p-3 w-12 h-12 flex items-center justify-center mx-auto mb-4">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-indigo-600"><path d="M12 2v4"/><path d="M12 18v4"/><path d="m4.93 4.93 2.83 2.83"/><path d="m16.24 16.24 2.83 2.83"/><path d="M2 12h4"/><path d="M18 12h4"/><path d="m4.93 19.07 2.83-2.83"/><path d="m16.24 7.76 2.83-2.83"/></svg>
+                        </div>
+                        <h3 class="text-lg font-semibold text-gray-900 mb-2">Processo Simples</h3>
+                        <p class="text-gray-600">Interface intuitiva e fácil de usar</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.5/socket.io.js"></script>
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>
