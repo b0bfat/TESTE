@@ -30,7 +30,7 @@ const downloadIcon = `
     </svg>`;
 
 // Function to handle download
-function downloadVideo() {
+async function downloadVideo() {
     const url = videoUrlInput.value.trim();
     
     if (!url) {
@@ -38,30 +38,60 @@ function downloadVideo() {
         return;
     }
 
-    // Update UI to loading state
-    downloadButton.disabled = true;
-    buttonIcon.innerHTML = loadingIcon;
-    progressContainer.classList.remove('hidden');
-    successMessage.classList.add('hidden');
-    
-    // Emit download event to server
-    socket.emit('start_download', { url: url });
+    try {
+        // Update UI to loading state
+        downloadButton.disabled = true;
+        buttonIcon.innerHTML = loadingIcon;
+        progressContainer.classList.remove('hidden');
+        successMessage.classList.add('hidden');
+        
+        // Send download request to server
+        const response = await fetch('/download', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ url }),
+        });
+
+        if (!response.ok) {
+            throw new Error('Erro ao iniciar o download');
+        }
+
+        const data = await response.json();
+        
+        if (data.error) {
+            throw new Error(data.error);
+        }
+
+        if (data.status === 'success') {
+            // Abrir pasta de downloads
+            await fetch('/open_folder', {
+                method: 'POST',
+            });
+        }
+    } catch (error) {
+        alert(`Erro: ${error.message}`);
+        resetUI();
+    }
 }
 
 // Socket event listeners
-socket.on('download_progress', (data) => {
-    const progress = data.progress;
+socket.on('progress', (data) => {
+    if (data.error) {
+        alert(`Erro: ${data.error}`);
+        resetUI();
+        return;
+    }
+
+    const progress = data.percent || 0;
     progressBar.style.width = `${progress}%`;
-    progressPercentage.textContent = `${progress}%`;
+    progressPercentage.textContent = `${Math.round(progress)}%`;
+    downloadStatus.textContent = data.message || 'Baixando...';
     
     if (progress === 100) {
         downloadComplete();
     }
-});
-
-socket.on('download_error', (data) => {
-    alert(`Erro: ${data.message}`);
-    resetUI();
 });
 
 // Function to handle download completion
@@ -81,6 +111,7 @@ function resetUI() {
     successMessage.classList.add('hidden');
     progressBar.style.width = '0%';
     progressPercentage.textContent = '0%';
+    downloadStatus.textContent = 'Baixando...';
 }
 
 // Event listener for Enter key
